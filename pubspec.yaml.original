@@ -1,0 +1,62 @@
+name: boardinghouse_finder
+description: "A professional Boardinghouse Finder app for Tagoloan, Misamis Oriental."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core dependencies
+  cupertino_icons: ^1.0.8
+  material_design_icons_flutter: ^7.0.7296
+  http: ^1.1.0
+  
+  # Location services
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+  
+  # Maps
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  google_maps_flutter: ^2.9.0
+  google_maps_flutter_web: ^0.5.10
+  
+  # QR scanning
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^6.0.1
+  
+  # Mobile utilities
+  url_launcher: ^6.3.1
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  # Package to automate changing the app icon
+  flutter_launcher_icons: ^0.13.1
+
+# Configuration for the App Icon
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/BH-Finder.png"
+  web:
+    generate: true
+  windows:
+    generate: true
+  macos:
+    generate: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/

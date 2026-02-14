@@ -1,0 +1,47 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/windows/runner",
+                "${workspaceFolder}/windows/flutter/ephemeral",
+                "${workspaceFolder}/windows/flutter/ephemeral/cpp_client_wrapper/include",
+                "${workspaceFolder}/windows/flutter/ephemeral/flutter_windows/include",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/cppwinrt",
+                "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include"
+            ],
+            "defines": [
+                "WIN32",
+                "_WINDOWS",
+                "NOMINMAX",
+                "UNICODE",
+                "_UNICODE",
+                "NDEBUG",
+                "FLUTTER_VERSION=\"3.38.9\"",
+                "FLUTTER_VERSION_MAJOR=3",
+                "FLUTTER_VERSION_MINOR=38",
+                "FLUTTER_VERSION_PATCH=9",
+                "FLUTTER_VERSION_BUILD=0"
+            ],
+            "windowsSdkVersion": "10.0.26100.0",
+            "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}
