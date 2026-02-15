@@ -586,6 +586,15 @@ class _SidebarLayoutState extends State<SidebarLayout>
                 availableWidth: _animation.value,
                 isActive: _currentScreen == 'about',
               ),
+              _FbNavItem(
+                icon: Icons.admin_panel_settings,
+                label: 'Admin',
+                onTap: () {
+                  Navigator.pushNamed(context, '/admin');
+                },
+                availableWidth: _animation.value,
+                isActive: false, // We won't track this as active in the main app
+              ),
             ],
           ),
         ),
@@ -679,6 +688,16 @@ class _SidebarLayoutState extends State<SidebarLayout>
                   showLabel: true,
                   isActive: _currentScreen == 'about',
                 ),
+                _FbDrawerItem(
+                  icon: Icons.admin_panel_settings,
+                  label: 'Admin Panel',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/admin');
+                  },
+                  showLabel: true,
+                  isActive: false,
+                ),
               ],
             ),
           ),
@@ -746,6 +765,16 @@ class _SidebarLayoutState extends State<SidebarLayout>
                 compact: true,
                 showLabel: true,
                 isActive: _currentScreen == 'about',
+              ),
+              _FbNavItem(
+                icon: Icons.admin_panel_settings,
+                label: 'Admin',
+                onTap: () {
+                  Navigator.pushNamed(context, '/admin');
+                },
+                compact: true,
+                showLabel: true,
+                isActive: false,
               ),
             ],
           ),

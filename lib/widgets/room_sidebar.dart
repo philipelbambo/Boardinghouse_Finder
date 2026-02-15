@@ -30,6 +30,71 @@ List<BoxShadow> _fbCardShadow() {
   ];
 }
 
+/// Custom hamburger menu icon with shorter bottom line
+class _CustomMenuIcon extends StatelessWidget {
+  final Color color;
+  final double size;
+
+  const _CustomMenuIcon({
+    required this.color,
+    this.size = 24,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _MenuIconPainter(color: color),
+      ),
+    );
+  }
+}
+
+class _MenuIconPainter extends CustomPainter {
+  final Color color;
+
+  _MenuIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final spacing = size.height * 0.3;
+    final topY = size.height * 0.25;
+    final middleY = size.height * 0.5;
+    final bottomY = size.height * 0.75;
+
+    // Top line (full width)
+    canvas.drawLine(
+      Offset(size.width * 0.1, topY),
+      Offset(size.width * 0.9, topY),
+      paint,
+    );
+
+    // Middle line (full width)
+    canvas.drawLine(
+      Offset(size.width * 0.1, middleY),
+      Offset(size.width * 0.9, middleY),
+      paint,
+    );
+
+    // Bottom line (shorter - 60% width, right-aligned)
+    canvas.drawLine(
+      Offset(size.width * 0.5, bottomY),
+      Offset(size.width * 0.9, bottomY),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class RoomSidebar extends StatefulWidget {
   final int? selectedRoom;
   final Function(int)? onRoomSelected;
@@ -93,7 +158,7 @@ class _RoomSidebarState extends State<RoomSidebar> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 12, 16),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -105,23 +170,6 @@ class _RoomSidebarState extends State<RoomSidebar> {
               fontWeight: FontWeight.w700,
               color: _textDark,
               letterSpacing: -0.5,
-            ),
-          ),
-          
-          // Collapse Button
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.onToggle,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: Icon(
-                  Icons.chevron_right,
-                  size: 24,
-                  color: _textLight,
-                ),
-              ),
             ),
           ),
         ],

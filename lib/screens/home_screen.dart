@@ -158,7 +158,7 @@ class _NmIconButtonState extends State<NmIconButton> {
           height: widget.size,
           decoration: BoxDecoration(
             color: _pressed ? _nmDark : _nmLight,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(3),
             boxShadow: _pressed ? [] : nmShadow(elevation: 1),
           ),
           child: Icon(widget.icon, color: widget.iconColor, size: 20),
@@ -747,32 +747,46 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Main Content Area
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: EdgeInsets.only(right: _isRoomSidebarVisible ? 250 : 0),
+          margin: EdgeInsets.only(right: _isRoomSidebarVisible ? 250 : 0),
           child: Column(children: [
             // ── Search Bar ────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 450,
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  decoration: BoxDecoration(
-                    color: _nmLight,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: nmShadow(elevation: 1),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (_) => _applyFilters(),
-                    decoration: InputDecoration(
-                      hintText: 'Search boardinghouses...',
-                      hintStyle: TextStyle(color: _textSecondary, fontSize: 15),
-                      prefixIcon: Icon(Icons.search, color: _textSecondary, size: 22),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+                child: Row(
+                  children: [
+                    // Search Bar Container
+                    Expanded(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        decoration: BoxDecoration(
+                          color: _nmLight,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: nmShadow(elevation: 1),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (_) => _applyFilters(),
+                          decoration: InputDecoration(
+                            hintText: 'Search boardinghouses...',
+                            hintStyle: TextStyle(color: _textSecondary, fontSize: 15),
+                            prefixIcon: Icon(Icons.search, color: _textSecondary, size: 22),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    // Toggle/Back Icon (outside search bar - right side)
+                    NmIconButton(
+                      icon: _isRoomSidebarVisible ? Icons.menu : Icons.arrow_back_ios,
+                      onTap: _toggleRoomSidebar,
+                      tooltip: _isRoomSidebarVisible ? 'Show Rooms' : 'Hide Rooms',
+                      size: 44,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -846,54 +860,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-        // ── Sidebar Reopen Button (when hidden) ────────────────────────────────
-        if (!_isRoomSidebarVisible)
-          Positioned(
-            top: 20,
-            right: 20,
-            child: GestureDetector(
-              onTap: _toggleRoomSidebar,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _nmLight,
-                  shape: BoxShape.circle,
-                  boxShadow: nmShadow(elevation: 2),
-                  border: Border.all(color: _nmDark, width: 1),
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: _nmPrimary,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-        // ── Sidebar Reopen Button (when hidden) ────────────────────────────────
-        if (!_isRoomSidebarVisible)
-          Positioned(
-            top: 20,
-            right: 20,
-            child: GestureDetector(
-              onTap: _toggleRoomSidebar,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _nmLight,
-                  shape: BoxShape.circle,
-                  boxShadow: nmShadow(elevation: 2),
-                  border: Border.all(color: _nmDark, width: 1),
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: _nmPrimary,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
+
 
         // ── Floating AI Chat Button ───────────────────────────────────────────
         Positioned(
@@ -1177,37 +1144,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               // Title + rating
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  Flexible(
                     child: Text(bh.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600, color: _textPrimary)),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   // Rating badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: _nmBg,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
-                        const SizedBox(width: 2),
-                        Flexible(
-                          child: Text(
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _nmBg,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
+                          const SizedBox(width: 1),
+                          Text(
                             bh.rating > 0 ? bh.rating.toStringAsFixed(1) : 'N/A',
                             style: TextStyle(
-                              fontSize: 12, color: _textPrimary, fontWeight: FontWeight.w600),
-                              overflow: TextOverflow.ellipsis,
+                              fontSize: 11, color: _textPrimary, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -1242,7 +1208,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 12),
               // Amenity chips
-              if (bh.amenities.isNotEmpty)
+              if (bh.amenities.isNotEmpty) ...[
                 Wrap(
                   spacing: 6, runSpacing: 6,
                   children: bh.amenities.take(3).map((a) => Container(
@@ -1258,6 +1224,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   )).toList(),
                 ),
+              ],
             ]),
           ),
         ]),

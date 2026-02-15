@@ -588,26 +588,31 @@ class _AiAssistantChatBoxState extends State<AiAssistantChatBox> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Recent Chats dropdown
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    hint: Row(
-                      children: [
-                        const Icon(
-                          Icons.history_rounded,
-                          color: FBColors.secondaryText,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Recent Chats ${_chatHistory.isEmpty ? '' : '(${_chatHistory.length})'}',
-                          style: const TextStyle(
-                            color: FBColors.darkText,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                Expanded(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      hint: Row(
+                        children: [
+                          const Icon(
+                            Icons.history_rounded,
+                            color: FBColors.secondaryText,
+                            size: 20,
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Recent Chats ${_chatHistory.isEmpty ? '' : '(${_chatHistory.length})'}',
+                              style: const TextStyle(
+                                color: FBColors.darkText,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     items: [
                       if (_chatHistory.isNotEmpty)
                         DropdownMenuItem<String>(
@@ -731,6 +736,7 @@ class _AiAssistantChatBoxState extends State<AiAssistantChatBox> {
                       color: FBColors.secondaryText,
                     ),
                   ),
+                ),
                 ),
                 // New Chat icon
                 Container(

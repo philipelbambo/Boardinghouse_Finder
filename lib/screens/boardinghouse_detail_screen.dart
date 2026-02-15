@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
 import '../models/boardinghouse.dart';
 import '../services/map_service.dart';
+import '../widgets/interested/interested_button.dart';
+import '../widgets/interested/interested_dialog.dart';
 
 class BoardinghouseDetailScreen extends StatefulWidget {
   final Boardinghouse boardinghouse;
@@ -28,6 +30,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
   Map<String, dynamic>? _mapData;
   bool _isLoadingMapData = true;
   bool _mapDataError = false;
+  bool _isInterested = false;
 
   // Facebook Settings colors
   static const Color _bgColor = Color(0xFFF0F2F5);
@@ -97,6 +100,21 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
         );
       }
     }
+  }
+
+  void _showInterestedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => InterestedDialog(
+        boardinghouseTitle: widget.boardinghouse.title,
+        boardinghouseId: widget.boardinghouse.id,
+      ),
+    ).then((_) {
+      // Update interested state after dialog closes
+      if (mounted) {
+        setState(() => _isInterested = true);
+      }
+    });
   }
 
   void _showContactOptions() {
@@ -371,6 +389,11 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                         ),
                       );
                     },
+                  ),
+                  // Interested Button
+                  InterestedButton(
+                    isInterested: _isInterested,
+                    onPressed: _showInterestedDialog,
                   ),
                   Positioned(
                     bottom: 20,

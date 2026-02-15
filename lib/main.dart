@@ -8,6 +8,8 @@ import 'screens/about_screen.dart';
 import 'widgets/sidebar_layout.dart';
 import 'models/boardinghouse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'admin/screens/admin_main_screen.dart';
+import 'admin/screens/admin_login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -100,6 +102,12 @@ class BoardinghouseFinderApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const MainScreen(selectedScreen: 'qr-scan'));
           case '/about':
             return MaterialPageRoute(builder: (_) => const AboutScreen());
+          case '/admin':
+            return MaterialPageRoute(builder: (_) => const AdminLoginScreen());
+          case '/admin/login':
+            return MaterialPageRoute(builder: (_) => const AdminLoginScreen());
+          case '/admin/dashboard':
+            return MaterialPageRoute(builder: (_) => const AdminMainScreen());
 
           default:
             return MaterialPageRoute(builder: (_) => const MainScreen());
