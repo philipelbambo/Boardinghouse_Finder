@@ -63,7 +63,7 @@ class AdminTheme {
           shadowColor: Colors.transparent,
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           ),
           textStyle: TextStyle(
             fontSize: 15,
@@ -90,7 +90,7 @@ class AdminTheme {
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           side: BorderSide(color: AdminConstants.borderColor, width: 1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           ),
           textStyle: TextStyle(
             fontSize: 15,
@@ -114,23 +114,23 @@ class AdminTheme {
       
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           borderSide: BorderSide(color: AdminConstants.borderColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           borderSide: BorderSide(color: AdminConstants.borderColor),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           borderSide: BorderSide(color: AdminConstants.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           borderSide: BorderSide(color: AdminConstants.errorColor),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           borderSide: BorderSide(color: AdminConstants.errorColor, width: 2),
         ),
         filled: true,
@@ -167,7 +167,7 @@ class AdminTheme {
       listTileTheme: ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
         ),
         selectedTileColor: AdminConstants.primaryColor.withOpacity(0.08),
         selectedColor: AdminConstants.primaryColor,
@@ -183,7 +183,7 @@ class AdminTheme {
         ),
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AdminConstants.cardRadius * 4),
           side: BorderSide.none,
         ),
       ),

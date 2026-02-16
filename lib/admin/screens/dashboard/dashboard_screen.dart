@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/admin_constants.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF1C1E21),
                       ),
                     ),
                   ),
@@ -36,25 +38,25 @@ class DashboardScreen extends StatelessWidget {
                         title: 'Total Properties',
                         value: '142',
                         icon: Icons.home,
-                        color: Colors.blue,
+                        color: Color(0xFF1877F2),
                       ),
                       _buildStatCard(
                         title: 'Active Bookings',
                         value: '24',
                         icon: Icons.book,
-                        color: Colors.green,
+                        color: Color(0xFF31A24C),
                       ),
                       _buildStatCard(
                         title: 'Pending Reviews',
                         value: '8',
                         icon: Icons.reviews,
-                        color: Colors.orange,
+                        color: Color(0xFFE99537),
                       ),
                       _buildStatCard(
                         title: 'Total Users',
                         value: '1,242',
                         icon: Icons.people,
-                        color: Colors.purple,
+                        color: Color(0xFF8A8D91),
                       ),
                     ],
                   ),
@@ -62,7 +64,7 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   
                   // Charts and tables section
-                  Container(
+                  SizedBox(
                     height: 400, // Fixed height to avoid unbounded constraints
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +75,7 @@ class DashboardScreen extends StatelessWidget {
                           child: Card(
                             elevation: 4,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -88,14 +90,14 @@ class DashboardScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 16),
-                                  Expanded( // Changed Container to Expanded
+                                  Expanded(
                                     child: Container(
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: Colors.grey.withOpacity(0.3),
                                           width: 1,
                                         ),
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
                                       ),
                                       child: const Center(
                                         child: Text(
@@ -122,7 +124,7 @@ class DashboardScreen extends StatelessWidget {
                           child: Card(
                             elevation: 4,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -139,7 +141,7 @@ class DashboardScreen extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   Expanded(
                                     child: ListView.separated(
-                                      shrinkWrap: false,
+                                      shrinkWrap: true,
                                       itemCount: 5,
                                       itemBuilder: (context, index) {
                                         return ListTile(
@@ -201,7 +203,7 @@ class DashboardScreen extends StatelessWidget {
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
         ),
         child: Container(
           padding: const EdgeInsets.all(12.0), // Reduced padding
@@ -237,8 +239,8 @@ class DashboardScreen extends StatelessWidget {
               ),
               Text(
                 title,
-                style: TextStyle(
-                  color: Colors.grey[600],
+                style: const TextStyle(
+                  color: Color(0xFF65676B),
                   fontSize: 12, // Reduced font size
                 ),
               ),

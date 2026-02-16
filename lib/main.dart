@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admin/utils/admin_constants.dart';
 import 'screens/home_screen.dart';
 import 'screens/boardinghouse_detail_screen.dart';
 import 'screens/favorites_screen.dart';
@@ -9,6 +10,11 @@ import 'widgets/sidebar_layout.dart';
 import 'models/boardinghouse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'admin/screens/admin_main_screen.dart';
+import 'admin/screens/dashboard_screen.dart';
+import 'admin/screens/properties_screen.dart';
+import 'admin/screens/bookings_screen.dart';
+import 'admin/screens/analytics_screen.dart';
+import 'admin/screens/settings_screen.dart';
 import 'admin/screens/admin_login_screen.dart';
 
 void main() async {
@@ -51,7 +57,7 @@ class BoardinghouseFinderApp extends StatelessWidget {
             backgroundColor: const Color(0xFF6E026F),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
             ),
           ),
         ),
@@ -62,7 +68,7 @@ class BoardinghouseFinderApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
             borderSide: BorderSide(color: Colors.grey[300]!),
           ),
           focusedBorder: const OutlineInputBorder(
@@ -78,7 +84,7 @@ class BoardinghouseFinderApp extends StatelessWidget {
           labelStyle: const TextStyle(color: Colors.white),
           secondaryLabelStyle: const TextStyle(color: Color(0xFF6E026F)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminConstants.cardRadius * 4)),
         ),
       ),
       home: const MainScreen(),
@@ -107,6 +113,14 @@ class BoardinghouseFinderApp extends StatelessWidget {
           case '/admin/login':
             return MaterialPageRoute(builder: (_) => const AdminLoginScreen());
           case '/admin/dashboard':
+            return MaterialPageRoute(builder: (_) => const AdminMainScreen());
+          case '/admin/properties':
+            return MaterialPageRoute(builder: (_) => const AdminMainScreen());
+          case '/admin/bookings':
+            return MaterialPageRoute(builder: (_) => const AdminMainScreen());
+          case '/admin/analytics':
+            return MaterialPageRoute(builder: (_) => const AdminMainScreen());
+          case '/admin/settings':
             return MaterialPageRoute(builder: (_) => const AdminMainScreen());
 
           default:

@@ -47,9 +47,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       );
 
       if (success) {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(builder: (context) => const AdminMainScreen()),
+          '/admin/dashboard',
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

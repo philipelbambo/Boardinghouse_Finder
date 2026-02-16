@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../admin/utils/admin_constants.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -95,7 +96,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
             content: const Text('Could not launch URL'),
             backgroundColor: _primary,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminConstants.buttonRadius)),
           ),
         );
       }
@@ -121,7 +122,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminConstants.cardRadius)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
@@ -129,7 +130,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: _cardColor,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -206,7 +207,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: _bgColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
         ),
         child: Row(
           children: [
@@ -257,7 +258,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSecondary ? _bgColor : _primary,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
           border: isSecondary ? Border.all(color: _borderColor) : null,
         ),
         child: Center(
@@ -279,7 +280,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _cardColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -356,7 +357,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                       return Container(
                         margin: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -366,7 +367,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AdminConstants.cardRadius),
                           child: Image.network(
                             widget.boardinghouse.images[index],
                             fit: BoxFit.cover,
@@ -484,7 +485,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         decoration: BoxDecoration(
                           color: _cardColor,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -578,7 +579,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                     height: 450,
                     decoration: BoxDecoration(
                       color: _cardColor,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
@@ -588,7 +589,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
                       child: Stack(
                         children: [
                           _isLoadingMapData
@@ -702,7 +703,7 @@ class _BoardinghouseDetailScreenState extends State<BoardinghouseDetailScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: _primary,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(AdminConstants.buttonRadius),
                             boxShadow: [
                               BoxShadow(
                                 color: _primary.withOpacity(0.3),

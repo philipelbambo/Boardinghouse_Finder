@@ -54,7 +54,7 @@ class AdminConstants {
   static const double standardPadding = 16.0;
   static const double largePadding = 24.0;
   static const double smallPadding = 8.0;
-  static const double cardRadius = 8.0;
+  static const double cardRadius = 4.0;
   static const double buttonRadius = 6.0;
   
   // Spacing (following Facebook's generous spacing)
