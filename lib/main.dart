@@ -10,11 +10,6 @@ import 'widgets/sidebar_layout.dart';
 import 'models/boardinghouse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'admin/screens/admin_main_screen.dart';
-import 'admin/screens/dashboard_screen.dart';
-import 'admin/screens/properties_screen.dart';
-import 'admin/screens/bookings_screen.dart';
-import 'admin/screens/analytics_screen.dart';
-import 'admin/screens/settings_screen.dart';
 import 'admin/screens/admin_login_screen.dart';
 
 void main() async {
@@ -193,9 +188,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return SidebarLayout(
-      child: _getCurrentScreen(),
       title: _getTitle(),
       onNavigate: _navigateTo,
+      child: _getCurrentScreen(),
     );
   }
 } 

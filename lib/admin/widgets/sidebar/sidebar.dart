@@ -5,19 +5,23 @@ import '../../utils/admin_constants.dart';
 class Sidebar extends StatelessWidget {
   final List<AdminMenuItem> menuItems;
   final String? currentRoute;
+  final bool isCollapsed;
   final Function(String)? onMenuItemSelected;
 
   const Sidebar({
     Key? key,
     required this.menuItems,
     this.currentRoute,
+    this.isCollapsed = false,
     this.onMenuItemSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final sidebarWidth = isCollapsed ? AdminConstants.sidebarCollapsedWidth : AdminConstants.sidebarWidth;
+    
     return Container(
-      width: AdminConstants.sidebarWidth,
+      width: sidebarWidth,
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF), // White card container
         boxShadow: [
@@ -35,7 +39,10 @@ class Sidebar extends StatelessWidget {
             // Logo/Header section - Facebook blue
             Container(
               height: 88,
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              padding: EdgeInsets.symmetric(
+                horizontal: isCollapsed ? 12.0 : 20.0, 
+                vertical: 20.0
+              ),
               decoration: const BoxDecoration(
                 color: Color(0xFF1877F2), // Facebook blue
                 borderRadius: BorderRadius.only(
@@ -57,16 +64,18 @@ class Sidebar extends StatelessWidget {
                       size: 28,
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  const Text(
-                    'Admin Panel',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.2,
+                  if (!isCollapsed) ...[
+                    const SizedBox(width: 14),
+                    const Text(
+                      'Admin Panel',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -75,7 +84,7 @@ class Sidebar extends StatelessWidget {
             
             // Menu items with spacing
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 6.0 : 12.0),
               child: Column(
                 children: menuItems.asMap().entries.map((entry) {
                   int index = entry.key;
@@ -97,8 +106,8 @@ class Sidebar extends StatelessWidget {
                         },
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCollapsed ? 12.0 : 16.0,
                             vertical: 14.0,
                           ),
                           decoration: BoxDecoration(
@@ -114,6 +123,7 @@ class Sidebar extends StatelessWidget {
                             ),
                           ),
                           child: Row(
+                            mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
                             children: [
                               Icon(
                                 item.icon,
@@ -122,31 +132,33 @@ class Sidebar extends StatelessWidget {
                                     : const Color(0xFF65676B), // Light gray for inactive
                                 size: 22,
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  item.title,
-                                  style: TextStyle(
-                                    fontWeight: isSelected 
-                                        ? FontWeight.w600 
-                                        : FontWeight.w500,
-                                    fontSize: 15,
-                                    color: isSelected 
-                                        ? const Color(0xFF1C1E21) // Dark gray for active text
-                                        : const Color(0xFF65676B), // Light gray for inactive text
-                                    letterSpacing: 0.1,
+                              if (!isCollapsed) ...[
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Text(
+                                    item.title,
+                                    style: TextStyle(
+                                      fontWeight: isSelected 
+                                          ? FontWeight.w600 
+                                          : FontWeight.w500,
+                                      fontSize: 15,
+                                      color: isSelected 
+                                          ? const Color(0xFF1C1E21) // Dark gray for active text
+                                          : const Color(0xFF65676B), // Light gray for inactive text
+                                      letterSpacing: 0.1,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (isSelected)
-                                Container(
-                                  width: 4,
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF1877F2),
-                                    shape: BoxShape.circle,
+                                if (isSelected)
+                                  Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF1877F2),
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
-                                ),
+                              ],
                             ],
                           ),
                         ),

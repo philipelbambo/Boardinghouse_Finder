@@ -10,7 +10,9 @@ class AdminLayout extends StatelessWidget {
   final String title;
   final List<AdminMenuItem>? menuItems;
   final String? currentRoute;
+  final bool isSidebarCollapsed;
   final Function(String)? onMenuItemSelected;
+  final VoidCallback? onToggleSidebar;
 
   const AdminLayout({
     Key? key,
@@ -18,7 +20,9 @@ class AdminLayout extends StatelessWidget {
     this.title = 'Admin Dashboard',
     this.menuItems,
     this.currentRoute,
+    this.isSidebarCollapsed = false,
     this.onMenuItemSelected,
+    this.onToggleSidebar,
   }) : super(key: key);
 
   @override
@@ -38,6 +42,7 @@ class AdminLayout extends StatelessWidget {
                 Sidebar(
                   menuItems: menuItems ?? _getDefaultMenuItems(),
                   currentRoute: currentRoute,
+                  isCollapsed: isSidebarCollapsed,
                   onMenuItemSelected: (String route) {
                     // Handle menu item selection
                     if (onMenuItemSelected != null) {
@@ -56,6 +61,8 @@ class AdminLayout extends StatelessWidget {
                       // Header at the top
                       Header(
                         title: title,
+                        isSidebarCollapsed: isSidebarCollapsed,
+                        onToggleSidebar: onToggleSidebar,
                         onNavigate: onMenuItemSelected,
                       ),
                       
@@ -276,11 +283,7 @@ class AdminLayout extends StatelessWidget {
         icon: Icons.dashboard,
         route: '/admin/dashboard',
       ),
-      AdminMenuItem(
-        title: 'Users',
-        icon: Icons.people,
-        route: '/admin/users',
-      ),
+
       AdminMenuItem(
         title: 'Properties',
         icon: Icons.home,

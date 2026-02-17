@@ -4,12 +4,16 @@ import '../../utils/admin_constants.dart';
 class Header extends StatelessWidget {
   final String title;
   final List<Widget>? actions;
+  final bool isSidebarCollapsed;
+  final VoidCallback? onToggleSidebar;
   final Function(String)? onNavigate;
 
   const Header({
     Key? key,
     required this.title,
     this.actions,
+    this.isSidebarCollapsed = false,
+    this.onToggleSidebar,
     this.onNavigate,
   }) : super(key: key);
 
@@ -29,6 +33,23 @@ class Header extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Sidebar toggle button
+          if (onToggleSidebar != null)
+            Container(
+              margin: const EdgeInsets.only(right: 16.0),
+              child: IconButton(
+                icon: Icon(
+                  isSidebarCollapsed ? Icons.menu : Icons.menu_open,
+                  color: const Color(0xFF65676B),
+                  size: 24,
+                ),
+                onPressed: onToggleSidebar,
+                tooltip: isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar',
+                padding: const EdgeInsets.all(12),
+                splashRadius: 24,
+              ),
+            ),
+          
           // Page title
           Expanded(
             child: Text(

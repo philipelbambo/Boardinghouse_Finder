@@ -6,10 +6,9 @@ import '../screens/bookings_screen.dart';
 import '../screens/analytics_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/profile_screen.dart';
-import '../widgets/admin_guard.dart';
 
 class AdminMainScreen extends StatefulWidget {
-  const AdminMainScreen({Key? key}) : super(key: key);
+  const AdminMainScreen({super.key});
 
   @override
   State<AdminMainScreen> createState() => _AdminMainScreenState();
@@ -18,20 +17,27 @@ class AdminMainScreen extends StatefulWidget {
 class _AdminMainScreenState extends State<AdminMainScreen> {
   String _currentRoute = '/admin/dashboard';
   Widget _currentScreen = const DashboardScreen();
+  bool _isSidebarCollapsed = false;
 
   @override
   Widget build(BuildContext context) {
     return AdminLayout(
       title: _getTitle(),
-      child: _currentScreen,
       currentRoute: _currentRoute,
       menuItems: _getDefaultMenuItems(),
+      isSidebarCollapsed: _isSidebarCollapsed,
       onMenuItemSelected: (String route) {
         setState(() {
           _currentRoute = route;
           _currentScreen = _getScreenByRoute(route);
         });
       },
+      onToggleSidebar: () {
+        setState(() {
+          _isSidebarCollapsed = !_isSidebarCollapsed;
+        });
+      },
+      child: _currentScreen,
     );
   }
 
@@ -80,11 +86,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         icon: Icons.dashboard,
         route: '/admin/dashboard',
       ),
-      AdminMenuItem(
-        title: 'Users',
-        icon: Icons.people,
-        route: '/admin/users',
-      ),
+
       AdminMenuItem(
         title: 'Properties',
         icon: Icons.home,

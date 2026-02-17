@@ -8,7 +8,7 @@ class AdminConstants {
   
   // Route names
   static const String adminDashboardRoute = '/admin/dashboard';
-  static const String adminUsersRoute = '/admin/users';
+
   static const String adminPropertiesRoute = '/admin/properties';
   static const String adminBookingsRoute = '/admin/bookings';
   static const String adminAnalyticsRoute = '/admin/analytics';
@@ -115,7 +115,7 @@ class AdminRoles {
 
 class AdminPermissions {
   static const String viewDashboard = 'view_dashboard';
-  static const String manageUsers = 'manage_users';
+
   static const String manageProperties = 'manage_properties';
   static const String manageBookings = 'manage_bookings';
   static const String viewAnalytics = 'view_analytics';
@@ -124,7 +124,7 @@ class AdminPermissions {
   // Permission display names
   static const Map<String, String> permissionDisplayNames = {
     viewDashboard: 'View Dashboard',
-    manageUsers: 'Manage Users',
+
     manageProperties: 'Manage Properties',
     manageBookings: 'Manage Bookings',
     viewAnalytics: 'View Analytics',
@@ -134,7 +134,7 @@ class AdminPermissions {
   // Permission icons
   static const Map<String, IconData> permissionIcons = {
     viewDashboard: Icons.dashboard_outlined,
-    manageUsers: Icons.people_outline,
+
     manageProperties: Icons.home_outlined,
     manageBookings: Icons.event_note_outlined,
     viewAnalytics: Icons.analytics_outlined,
