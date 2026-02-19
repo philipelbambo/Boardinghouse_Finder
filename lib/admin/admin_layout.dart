@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'widgets/sidebar/sidebar.dart';
 import 'widgets/header/header.dart';
 import 'widgets/footer/footer.dart';
+import 'widgets/ai_chatbot_widget.dart';
+
 import 'utils/admin_constants.dart';
 import 'utils/admin_routes.dart';
 
-class AdminLayout extends StatelessWidget {
+class AdminLayout extends StatefulWidget {
   final Widget child;
   final String title;
   final List<AdminMenuItem>? menuItems;
@@ -26,6 +28,12 @@ class AdminLayout extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<AdminLayout> createState() => _AdminLayoutState();
+}
+
+class _AdminLayoutState extends State<AdminLayout> {
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -35,50 +43,56 @@ class AdminLayout extends StatelessWidget {
         if (isDesktop) {
           // Desktop layout: Sidebar on the left, header at the top, content in the middle, footer at the bottom
           return Scaffold(
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            body: Stack(
               children: [
-                // Fixed sidebar on the left
-                Sidebar(
-                  menuItems: menuItems ?? _getDefaultMenuItems(),
-                  currentRoute: currentRoute,
-                  isCollapsed: isSidebarCollapsed,
-                  onMenuItemSelected: (String route) {
-                    // Handle menu item selection
-                    if (onMenuItemSelected != null) {
-                      onMenuItemSelected!(route);
-                    } else {
-                      Navigator.pushReplacementNamed(context, route);
-                    }
-                  },
-                ),
-                
-                // Main content area (Header + Content + Footer)
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header at the top
-                      Header(
-                        title: title,
-                        isSidebarCollapsed: isSidebarCollapsed,
-                        onToggleSidebar: onToggleSidebar,
-                        onNavigate: onMenuItemSelected,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fixed sidebar on the left
+                    Sidebar(
+                      menuItems: widget.menuItems ?? _getDefaultMenuItems(),
+                      currentRoute: widget.currentRoute,
+                      isCollapsed: widget.isSidebarCollapsed,
+                      onMenuItemSelected: (String route) {
+                        // Handle menu item selection
+                        if (widget.onMenuItemSelected != null) {
+                          widget.onMenuItemSelected!(route);
+                        } else {
+                          Navigator.pushReplacementNamed(context, route);
+                        }
+                      },
+                    ),
+                    
+                    // Main content area (Header + Content + Footer)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header at the top
+                          Header(
+                            title: widget.title,
+                            isSidebarCollapsed: widget.isSidebarCollapsed,
+                            onToggleSidebar: widget.onToggleSidebar,
+                            onNavigate: widget.onMenuItemSelected,
+                          ),
+                          
+                          // Main content area
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: widget.child,
+                            ),
+                          ),
+                          
+                          // Footer at the bottom
+                          Footer(),
+                        ],
                       ),
-                      
-                      // Main content area
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          child: child,
-                        ),
-                      ),
-                      
-                      // Footer at the bottom
-                      Footer(),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                // AI Chatbot
+                const AIChatbotWidget(),
               ],
             ),
           );
@@ -86,7 +100,7 @@ class AdminLayout extends StatelessWidget {
           // Mobile/Tablet layout: Use standard app bar and drawer
           return Scaffold(
             appBar: AppBar(
-              title: Text(title),
+              title: Text(widget.title),
               centerTitle: false,
               elevation: 1,
               actions: [
@@ -131,10 +145,10 @@ class AdminLayout extends StatelessWidget {
                   onSelected: (value) {
                     if (value == '/admin/profile') {
                       // Navigate to profile screen
-                      onMenuItemSelected?.call(value);
+                      widget.onMenuItemSelected?.call(value);
                     } else if (value == '/admin/settings') {
                       // Navigate to settings screen
-                      onMenuItemSelected?.call(value);
+                      widget.onMenuItemSelected?.call(value);
                     } else if (value == 'signout') {
                       // Show confirmation dialog
                       _showSignOutDialog(context);
@@ -252,20 +266,26 @@ class AdminLayout extends StatelessWidget {
               ],
             ),
             drawer: Sidebar(
-              menuItems: menuItems ?? _getDefaultMenuItems(),
-              currentRoute: currentRoute,
+              menuItems: widget.menuItems ?? _getDefaultMenuItems(),
+              currentRoute: widget.currentRoute,
               onMenuItemSelected: (String route) {
                 // Handle menu item selection
-                if (onMenuItemSelected != null) {
-                  onMenuItemSelected!(route);
+                if (widget.onMenuItemSelected != null) {
+                  widget.onMenuItemSelected!(route);
                 } else {
                   Navigator.pushReplacementNamed(context, route);
                 }
               },
             ),
-            body: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: child,
+            body: Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: widget.child,
+                ),
+                // AI Chatbot - Last in stack to ensure it's on top
+                AIChatbotWidget(),
+              ],
             ),
             bottomNavigationBar: constraints.maxWidth < 768 
                 ? Footer() 
