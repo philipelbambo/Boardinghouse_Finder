@@ -34,6 +34,9 @@ dependencies:
   url_launcher: ^6.3.1
   permission_handler: ^11.3.1
   shared_preferences: ^2.3.2
+  
+  # Environment variables
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/admin_login_screen.dart';
+import '../services/admin_auth_service.dart';
 
 class AdminGuard extends StatelessWidget {
   final Widget child;
@@ -13,22 +14,36 @@ class AdminGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // In a real app, you would check for admin authentication here
-    // For now, we'll just pass through to demonstrate the structure
-    bool isAdminAuthenticated = true; // This would be determined by your auth logic
+    return FutureBuilder<bool>(
+      future: AdminAuthService.instance.isLoggedIn(),
+      builder: (context, snapshot) {
+        bool isAdminAuthenticated = snapshot.data ?? false;
 
-    if (!isAdminAuthenticated && redirectRoute != null) {
-      // Redirect to login if not authenticated
-      Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed(redirectRoute!);
-      });
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+        if (!isAdminAuthenticated && redirectRoute != null) {
+          // Redirect to login if not authenticated
+          if (snapshot.connectionState == ConnectionState.done) {
+            Future.microtask(() {
+              Navigator.of(context).pushReplacementNamed(redirectRoute!);
+            });
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        }
 
-    return child;
+        // Show loading indicator while checking authentication
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        return child;
+      },
+    );
   }
 }

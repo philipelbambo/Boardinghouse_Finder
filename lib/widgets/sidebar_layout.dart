@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../admin/services/admin_auth_service.dart';
 
 // ─── Facebook Settings Design Tokens ──────────────────────────────────────────
 const _kBgColor       = Color(0xFFF0F2F5);   // light gray background
@@ -586,14 +587,23 @@ class _SidebarLayoutState extends State<SidebarLayout>
                 availableWidth: _animation.value,
                 isActive: _currentScreen == 'about',
               ),
-              _FbNavItem(
-                icon: Icons.admin_panel_settings,
-                label: 'Admin',
-                onTap: () {
-                  Navigator.pushNamed(context, '/admin');
+              FutureBuilder<bool>(
+                future: AdminAuthService.instance.isLoggedIn(),
+                builder: (context, snapshot) {
+                  bool isAdmin = snapshot.data ?? false;
+                  if (isAdmin) {
+                    return _FbNavItem(
+                      icon: Icons.admin_panel_settings,
+                      label: 'Admin',
+                      onTap: () {
+                        Navigator.pushNamed(context, '/admin');
+                      },
+                      availableWidth: _animation.value,
+                      isActive: false, // We won't track this as active in the main app
+                    );
+                  }
+                  return const SizedBox.shrink(); // Hide if not admin
                 },
-                availableWidth: _animation.value,
-                isActive: false, // We won't track this as active in the main app
               ),
             ],
           ),
@@ -688,15 +698,24 @@ class _SidebarLayoutState extends State<SidebarLayout>
                   showLabel: true,
                   isActive: _currentScreen == 'about',
                 ),
-                _FbDrawerItem(
-                  icon: Icons.admin_panel_settings,
-                  label: 'Admin Panel',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/admin');
+                FutureBuilder<bool>(
+                  future: AdminAuthService.instance.isLoggedIn(),
+                  builder: (context, snapshot) {
+                    bool isAdmin = snapshot.data ?? false;
+                    if (isAdmin) {
+                      return _FbDrawerItem(
+                        icon: Icons.admin_panel_settings,
+                        label: 'Admin Panel',
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/admin');
+                        },
+                        showLabel: true,
+                        isActive: false,
+                      );
+                    }
+                    return const SizedBox.shrink(); // Hide if not admin
                   },
-                  showLabel: true,
-                  isActive: false,
                 ),
               ],
             ),
@@ -766,15 +785,24 @@ class _SidebarLayoutState extends State<SidebarLayout>
                 showLabel: true,
                 isActive: _currentScreen == 'about',
               ),
-              _FbNavItem(
-                icon: Icons.admin_panel_settings,
-                label: 'Admin',
-                onTap: () {
-                  Navigator.pushNamed(context, '/admin');
+              FutureBuilder<bool>(
+                future: AdminAuthService.instance.isLoggedIn(),
+                builder: (context, snapshot) {
+                  bool isAdmin = snapshot.data ?? false;
+                  if (isAdmin) {
+                    return _FbNavItem(
+                      icon: Icons.admin_panel_settings,
+                      label: 'Admin',
+                      onTap: () {
+                        Navigator.pushNamed(context, '/admin');
+                      },
+                      compact: true,
+                      showLabel: true,
+                      isActive: false,
+                    );
+                  }
+                  return const SizedBox.shrink(); // Hide if not admin
                 },
-                compact: true,
-                showLabel: true,
-                isActive: false,
               ),
             ],
           ),

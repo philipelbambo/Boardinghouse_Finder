@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:ui';
+import 'package:flutter/scheduler.dart';
 import '../utils/admin_constants.dart';
 import '../admin_AI_Chatbot/services/ai_response_service.dart';
 import '../../../screens/ai_assistant_screen.dart' show FBColors;
 
+// Initialize the AI service to load environment variables
+void initializeAIService() {
+  AIResponseService.initialize();
+}
+
+// Fake TickerProvider for default controller
+class _FakeTickerProvider implements TickerProvider {
+  const _FakeTickerProvider();
+  
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    return Ticker(onTick, debugLabel: 'FakeTicker');
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
-// Data Model
+// Data Models
 // ─────────────────────────────────────────────────────────────
 class ChatMessage {
   final String text;
@@ -17,6 +33,20 @@ class ChatMessage {
     required this.text,
     required this.isUser,
     required this.timestamp,
+  });
+}
+
+class ChatSession {
+  final String id;
+  final String title;
+  final DateTime lastUpdated;
+  final List<ChatMessage> messages;
+
+  ChatSession({
+    required this.id,
+    required this.title,
+    required this.lastUpdated,
+    required this.messages,
   });
 }
 
@@ -33,23 +63,38 @@ class AIChatbotWidget extends StatefulWidget {
 class _AIChatbotWidgetState extends State<AIChatbotWidget>
     with TickerProviderStateMixin {
   // ── State ──────────────────────────────────────────────────
-  bool _isChatOpen   = false;
-  bool _isTyping     = false;
-  final List<ChatMessage> _messages = [];
-  final TextEditingController _textController = TextEditingController();
-  final ScrollController     _scrollController = ScrollController();
-  final FocusNode            _inputFocus = FocusNode();
+  bool _isChatOpen          = false;
+  bool _isTyping            = false;
+  bool _showRecentChats     = false;   // toggle for recent chats panel
+  int  _sessionCounter      = 1;
+
+  final List<ChatMessage>  _messages        = [];
+  final List<ChatSession>  _recentSessions  = [];
+  final TextEditingController _textController  = TextEditingController();
+  final ScrollController      _scrollController = ScrollController();
+  final FocusNode             _inputFocus       = FocusNode();
 
   // ── Animations ─────────────────────────────────────────────
   late AnimationController _panelController;
   late AnimationController _typingController;
   late AnimationController _blurController;
+  late AnimationController _recentController;
 
-  late Animation<double>  _panelSlide;
-  late Animation<double>  _panelFade;
-  late Animation<double>  _typingDot;
-  late Animation<double>  _blurOpacity;
-  late Animation<double>  _blurIntensity;
+  late Animation<double> _panelSlide;
+  late Animation<double> _panelFade;
+  late Animation<double> _typingDot;
+  late Animation<double> _blurOpacity;
+  late Animation<double> _blurIntensity;
+  late Animation<double> _recentHeight;
+
+  // Default animation for safe initialization
+  static const _defaultAnimation = AlwaysStoppedAnimation<double>(0.0);
+  
+  // Default controller for safe initialization
+  static final _defaultController = AnimationController(
+    vsync: const _FakeTickerProvider(),
+    duration: const Duration(milliseconds: 1),
+  );
 
   // ── Lifecycle ──────────────────────────────────────────────
   @override
@@ -94,21 +139,31 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
       reverseCurve: const Interval(0.2, 1.0, curve: Curves.easeIn),
     );
 
+    // Recent chats collapse/expand
+    _recentController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+    _recentHeight = CurvedAnimation(
+      parent: _recentController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
     // Welcome message
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 600), () {
-        _addBotMessage(
-          "Hi! 👋 I'm your AI assistant. How can I help you today?",
-        );
+        _addBotMessage("Hi! 👋 I'm your AI assistant. How can I help you today?");
       });
     });
   }
 
   @override
   void dispose() {
-    _panelController.dispose();
-    _typingController.dispose();
-    _blurController.dispose();
+    _safePanelController.dispose();
+    _safeBlurController.dispose();
+    _safeRecentController.dispose();
+    _safeTypingController.dispose();
     _textController.dispose();
     _scrollController.dispose();
     _inputFocus.dispose();
@@ -116,19 +171,221 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
   }
 
   // ── Helpers ────────────────────────────────────────────────
+  Animation<double> get _safeRecentHeight {
+    try {
+      return _recentHeight;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  Animation<double> get _safePanelSlide {
+    try {
+      return _panelSlide;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  Animation<double> get _safePanelFade {
+    try {
+      return _panelFade;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  Animation<double> get _safeBlurOpacity {
+    try {
+      return _blurOpacity;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  Animation<double> get _safeBlurIntensity {
+    try {
+      return _blurIntensity;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  Animation<double> get _safeTypingDot {
+    try {
+      return _typingDot;
+    } catch (e) {
+      return _defaultAnimation;
+    }
+  }
+
+  AnimationController get _safeRecentController {
+    try {
+      return _recentController;
+    } catch (e) {
+      return _defaultController;
+    }
+  }
+
+  AnimationController get _safePanelController {
+    try {
+      return _panelController;
+    } catch (e) {
+      return _defaultController;
+    }
+  }
+
+  AnimationController get _safeBlurController {
+    try {
+      return _blurController;
+    } catch (e) {
+      return _defaultController;
+    }
+  }
+
+  AnimationController get _safeTypingController {
+    try {
+      return _typingController;
+    } catch (e) {
+      return _defaultController;
+    }
+  }
+
   void _toggleChat() {
     setState(() => _isChatOpen = !_isChatOpen);
     if (_isChatOpen) {
-      _panelController.forward();
-      _blurController.forward();
+      _safePanelController.forward();
+      _safeBlurController.forward();
       Future.delayed(const Duration(milliseconds: 200), () {
         _inputFocus.requestFocus();
       });
     } else {
-      _panelController.reverse();
-      _blurController.reverse();
+      _safePanelController.reverse();
+      _safeBlurController.reverse();
       _inputFocus.unfocus();
     }
+  }
+
+  void _toggleRecentChats() {
+    setState(() => _showRecentChats = !_showRecentChats);
+    if (_showRecentChats) {
+      _safeRecentController.forward();
+    } else {
+      _safeRecentController.reverse();
+    }
+  }
+
+  /// Save the current session then start a fresh one.
+  void _startNewChat() {
+    // Always save current session (even if empty)
+    // Build a title - either from first message or default
+    String title;
+    if (_messages.isNotEmpty) {
+      final firstUser = _messages.firstWhere(
+        (m) => m.isUser,
+        orElse: () => _messages.first,
+      );
+      title = firstUser.text.length > 40
+          ? '${firstUser.text.substring(0, 40)}…'
+          : firstUser.text;
+    } else {
+      title = 'New Conversation $_sessionCounter';
+    }
+
+    setState(() {
+      _recentSessions.insert(
+        0,
+        ChatSession(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: title,
+          lastUpdated: DateTime.now(),
+          messages: List.unmodifiable(_messages),
+        ),
+      );
+      _messages.clear();
+      _sessionCounter++;
+      _isTyping = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 120), () {
+      _addBotMessage("Hi! 👋 Starting a new conversation. How can I help you?");
+    });
+  }
+
+  /// Restore a past session for viewing.
+  void _restoreSession(ChatSession session) {
+    // Save current session if it has content
+    if (_messages.isNotEmpty) {
+      final firstUser = _messages.firstWhere(
+        (m) => m.isUser,
+        orElse: () => _messages.first,
+      );
+      final title = firstUser.text.length > 40
+          ? '${firstUser.text.substring(0, 40)}…'
+          : firstUser.text;
+
+      _recentSessions.removeWhere((s) => s.id == session.id);
+      _recentSessions.insert(
+        0,
+        ChatSession(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: title,
+          lastUpdated: DateTime.now(),
+          messages: List.unmodifiable(_messages),
+        ),
+      );
+    }
+
+    setState(() {
+      _messages
+        ..clear()
+        ..addAll(session.messages);
+      _showRecentChats = false;
+    });
+    _safeRecentController.reverse();
+    _scrollToBottom();
+  }
+
+  /// Delete a recent session from history
+  void _deleteRecentSession(ChatSession session) {
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Conversation'),
+          content: Text('Are you sure you want to delete "${session.title}"? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _recentSessions.removeWhere((s) => s.id == session.id);
+                });
+                
+                // Show confirmation snackbar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Conversation deleted'),
+                    duration: const Duration(seconds: 2),
+                    backgroundColor: Colors.red.withOpacity(0.8),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _addMessage(String text, {required bool isUser}) {
@@ -165,7 +422,6 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
     _textController.clear();
     _inputFocus.requestFocus();
 
-    // Show typing indicator, then respond
     setState(() => _isTyping = true);
     _scrollToBottom();
 
@@ -178,13 +434,12 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
 
   void _simulateAIResponse(String userMessage) async {
     try {
-      final response = await AIResponseService.getAIResponse(userMessage);
-      if (mounted) {
-        _addBotMessage(response);
-      }
+      final response = await AIResponseService.getAdvancedAIResponse(userMessage);
+      if (mounted) _addBotMessage(response);
     } catch (e) {
       if (mounted) {
-        _addBotMessage("Thanks for your message! I'm here to help with any questions you have.");
+        _addBotMessage(
+            "Thanks for your message! I'm here to help with any questions you have.");
       }
     }
   }
@@ -192,10 +447,19 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
   String _formatTime(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
+  String _formatDate(DateTime t) {
+    final now = DateTime.now();
+    final diff = now.difference(t);
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays == 1) return 'Yesterday';
+    return '${t.day}/${t.month}/${t.year}';
+  }
+
   double _panelWidth(BuildContext ctx) {
     final w = MediaQuery.of(ctx).size.width;
     if (w > 1200) return 400;
-    if (w > 768)  return 360;
+    if (w > 768) return 360;
     return w * 0.92;
   }
 
@@ -204,21 +468,21 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // ── Backdrop Blur Overlay ─────────────────────────────────────
+        // ── Backdrop Blur Overlay ──────────────────────────────
         if (_isChatOpen)
           AnimatedBuilder(
             animation: _blurController,
             builder: (context, child) {
               return Positioned.fill(
                 child: Opacity(
-                  opacity: _blurOpacity.value * 0.7, // 70% max opacity for dark overlay
+                  opacity: _safeBlurOpacity.value * 0.7,
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
-                      sigmaX: 8.0 * _blurIntensity.value,  // Soft blur effect
-                      sigmaY: 8.0 * _blurIntensity.value,
+                      sigmaX: 8.0 * _safeBlurIntensity.value,
+                      sigmaY: 8.0 * _safeBlurIntensity.value,
                     ),
                     child: Container(
-                      color: Colors.black.withOpacity(0.3 * _blurOpacity.value), // Semi-transparent dark overlay
+                      color: Colors.black.withOpacity(0.3 * _safeBlurOpacity.value),
                     ),
                   ),
                 ),
@@ -226,7 +490,7 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
             },
           ),
 
-        // ── Chat Panel ─────────────────────────────────────
+        // ── Chat Panel ─────────────────────────────────────────
         AnimatedBuilder(
           animation: _panelController,
           builder: (context, child) {
@@ -236,11 +500,11 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
               bottom: 0,
               child: Transform.translate(
                 offset: Offset(
-                  _panelWidth(context) * (1 - _panelSlide.value),
+                  _panelWidth(context) * (1 - _safePanelSlide.value),
                   0,
                 ),
                 child: Opacity(
-                  opacity: _panelFade.value,
+                  opacity: _safePanelFade.value,
                   child: child,
                 ),
               ),
@@ -249,7 +513,7 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
           child: _buildChatPanel(),
         ),
 
-        // ── Floating Chat Icon ────────────────────────────────────────────
+        // ── Floating Chat Icon ─────────────────────────────────
         if (!_isChatOpen)
           Positioned(
             bottom: 28,
@@ -278,7 +542,8 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                     ),
                   ],
                 ),
-                child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 22),
+                child: const Icon(Icons.chat_bubble_rounded,
+                    color: Colors.white, size: 22),
               ),
             ),
           ),
@@ -309,6 +574,8 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
           children: [
             _buildHeader(),
             _buildOnlineBadge(),
+            // ── Recent Chats (collapsible) ──────────────────
+            _buildRecentChatsPanel(),
             Expanded(child: _buildMessagesArea()),
             if (_isTyping) _buildTypingIndicator(),
             _buildInputArea(),
@@ -342,9 +609,11 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+              border:
+                  Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+            child: const Icon(Icons.auto_awesome_rounded,
+                color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
 
@@ -372,7 +641,8 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                       decoration: BoxDecoration(
                         color: const Color(0xFF42B72A),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.2),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.6), width: 1.2),
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -390,6 +660,29 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
             ),
           ),
 
+          // Recent chats toggle button
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _toggleRecentChats,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _showRecentChats
+                      ? Colors.white.withOpacity(0.3)
+                      : Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(Icons.history_rounded,
+                    color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
           // Close
           Material(
             color: Colors.transparent,
@@ -404,7 +697,8 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                   color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                child: const Icon(Icons.close_rounded,
+                    color: Colors.white, size: 20),
               ),
             ),
           ),
@@ -421,7 +715,9 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
       color: AdminConstants.primaryColor.withOpacity(0.1),
       child: Row(
         children: [
-          Icon(Icons.lock_outline_rounded, size: 13, color: AdminConstants.primaryColor.withOpacity(0.8)),
+          Icon(Icons.lock_outline_rounded,
+              size: 13,
+              color: AdminConstants.primaryColor.withOpacity(0.8)),
           const SizedBox(width: 6),
           Text(
             'End-to-end encrypted conversation',
@@ -437,6 +733,161 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
     );
   }
 
+  // ── Recent Chats Panel (collapsible) ─────────────────────
+  Widget _buildRecentChatsPanel() {
+    return SizeTransition(
+      sizeFactor: _safeRecentHeight,
+      axisAlignment: -1,
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 220),
+        decoration: BoxDecoration(
+          color: AdminConstants.backgroundColor,
+          border: Border(
+            bottom: BorderSide(color: AdminConstants.borderColor, width: 1),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Section header
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.history_rounded,
+                      size: 15,
+                      color: AdminConstants.textColor.withOpacity(0.6)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Recent Chats',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AdminConstants.textColor.withOpacity(0.6),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_recentSessions.isNotEmpty)
+                    Text(
+                      '${_recentSessions.length} conversation${_recentSessions.length > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AdminConstants.textColor.withOpacity(0.4),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Sessions list or empty state
+            if (_recentSessions.isEmpty)
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: Row(
+                  children: [
+                    Icon(Icons.chat_bubble_outline_rounded,
+                        size: 14,
+                        color: AdminConstants.textColor.withOpacity(0.3)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'No previous chats yet',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AdminConstants.textColor.withOpacity(0.4),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: 8),
+                  itemCount: _recentSessions.length,
+                  itemBuilder: (context, index) {
+                    final session = _recentSessions[index];
+                    return _buildRecentSessionTile(session);
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentSessionTile(ChatSession session) {
+    return InkWell(
+      onTap: () => _restoreSession(session),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AdminConstants.primaryColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 15,
+                color: AdminConstants.primaryColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    session.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AdminConstants.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${session.messages.length} messages · ${_formatDate(session.lastUpdated)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AdminConstants.textColor.withOpacity(0.45),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Delete button
+            IconButton(
+              onPressed: () => _deleteRecentSession(session),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: AdminConstants.textColor.withOpacity(0.4),
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                size: 18,
+                color: AdminConstants.textColor.withOpacity(0.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ── Messages ──────────────────────────────────────────────
   Widget _buildMessagesArea() {
     return Container(
@@ -448,14 +899,16 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
         itemBuilder: (context, index) {
           final msg = _messages[index];
           final prev = index > 0 ? _messages[index - 1] : null;
-          final isFirstInGroup = prev == null || prev.isUser != msg.isUser;
+          final isFirstInGroup =
+              prev == null || prev.isUser != msg.isUser;
           return _buildMessageBubble(msg, isFirstInGroup: isFirstInGroup);
         },
       ),
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage msg, {required bool isFirstInGroup}) {
+  Widget _buildMessageBubble(ChatMessage msg,
+      {required bool isFirstInGroup}) {
     final isUser = msg.isUser;
 
     return Padding(
@@ -464,14 +917,13 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
         top: isFirstInGroup ? 10 : 0,
       ),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // ── FIX: Bot avatar — always reserve the same width (36px),
-          // but only render the avatar circle on the first message in a group.
           if (!isUser)
             SizedBox(
-              width: 36, // 28 avatar + 8 margin
+              width: 36,
               child: isFirstInGroup
                   ? Container(
                       width: 28,
@@ -481,36 +933,41 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                         color: FBColors.primaryBlue,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                      child: const Icon(Icons.auto_awesome_rounded,
+                          color: Colors.white, size: 14),
                     )
                   : null,
             ),
 
-          // Bubble
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width * 0.68,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isUser ? AdminConstants.primaryColor : AdminConstants.cardColor,
+                    color: isUser
+                        ? AdminConstants.primaryColor
+                        : AdminConstants.cardColor,
                     borderRadius: BorderRadius.only(
-                      topLeft:     const Radius.circular(18),
-                      topRight:    const Radius.circular(18),
-                      bottomLeft:  isUser ? const Radius.circular(18) : const Radius.circular(4),
-                      bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(18),
+                      topLeft: const Radius.circular(18),
+                      topRight: const Radius.circular(18),
+                      bottomLeft: isUser
+                          ? const Radius.circular(18)
+                          : const Radius.circular(4),
+                      bottomRight: isUser
+                          ? const Radius.circular(4)
+                          : const Radius.circular(18),
                     ),
                     border: isUser
                         ? null
-                        : Border.all(color: AdminConstants.borderColor, width: 1),
+                        : Border.all(
+                            color: AdminConstants.borderColor, width: 1),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.06),
@@ -524,7 +981,9 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: isUser ? Colors.white : AdminConstants.textColor,
+                      color: isUser
+                          ? Colors.white
+                          : AdminConstants.textColor,
                       height: 1.45,
                     ),
                   ),
@@ -543,7 +1002,6 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
             ),
           ),
 
-          // User avatar spacing
           if (isUser) const SizedBox(width: 4),
         ],
       ),
@@ -559,33 +1017,39 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: AdminConstants.cardColor,
               borderRadius: const BorderRadius.only(
-                topLeft:     Radius.circular(18),
-                topRight:    Radius.circular(18),
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
                 bottomRight: Radius.circular(18),
-                bottomLeft:  Radius.circular(4),
+                bottomLeft: Radius.circular(4),
               ),
-              border: Border.all(color: AdminConstants.borderColor, width: 1),
+              border:
+                  Border.all(color: AdminConstants.borderColor, width: 1),
             ),
             child: AnimatedBuilder(
               animation: _typingDot,
               builder: (_, __) => Row(
                 children: List.generate(3, (i) {
                   final delay = i * 0.33;
-                  final phase = (_typingDot.value - delay).clamp(0.0, 1.0);
-                  final bounce = (phase < 0.5) ? phase * 2 : (1 - phase) * 2;
+                  final phase =
+                      (_safeTypingDot.value - delay).clamp(0.0, 1.0);
+                  final bounce =
+                      (phase < 0.5) ? phase * 2 : (1 - phase) * 2;
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 2.5),
                     width: 7,
                     height: 7,
                     decoration: BoxDecoration(
-                      color: AdminConstants.textColor.withOpacity(0.5 + bounce * 0.5),
+                      color: AdminConstants.textColor
+                          .withOpacity(0.5 + bounce * 0.5),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    transform: Matrix4.translationValues(0, -bounce * 4, 0),
+                    transform:
+                        Matrix4.translationValues(0, -bounce * 4, 0),
                   );
                 }),
               ),
@@ -616,15 +1080,48 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // TextField
+          // ── New Chat button ───────────────────────────────
+          Tooltip(
+            message: 'New Chat',
+            child: GestureDetector(
+              onTap: _startNewChat,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AdminConstants.backgroundColor,
+                  borderRadius: BorderRadius.circular(19),
+                  border: Border.all(
+                      color: AdminConstants.borderColor, width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.add_comment_rounded,
+                  color: AdminConstants.primaryColor,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          // ── TextField ─────────────────────────────────────
           Expanded(
             child: Container(
               constraints: const BoxConstraints(maxHeight: 120),
-              margin: const EdgeInsets.symmetric(horizontal: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
                 color: AdminConstants.backgroundColor,
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: AdminConstants.borderColor, width: 1),
+                border:
+                    Border.all(color: AdminConstants.borderColor, width: 1),
               ),
               child: TextField(
                 controller: _textController,
@@ -647,14 +1144,15 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                     fontWeight: FontWeight.w400,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 10),
                   isDense: true,
                 ),
               ),
             ),
           ),
 
-          // Send button
+          // ── Send button ───────────────────────────────────
           GestureDetector(
             onTap: _handleSendMessage,
             child: AnimatedContainer(
@@ -672,7 +1170,8 @@ class _AIChatbotWidgetState extends State<AIChatbotWidget>
                   ),
                 ],
               ),
-              child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              child: const Icon(Icons.send_rounded,
+                  color: Colors.white, size: 18),
             ),
           ),
         ],

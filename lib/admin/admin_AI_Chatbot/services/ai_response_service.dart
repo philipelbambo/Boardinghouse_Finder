@@ -1,13 +1,45 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIResponseService {
-  // Mock AI response service - in a real implementation, this would connect to an AI API
+  // Load environment variables
+  static Future<void> initialize() async {
+    await dotenv.load(fileName: ".env");
+  }
+
+  // Get AI response from backend API
   static Future<String> getAIResponse(String userMessage) async {
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    // Predefined responses based on keywords
+    try {
+      // Use the same backend API that the main app uses
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/api/ai/chat'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'message': userMessage,
+          'context': [] // For simplicity, no context in admin chat
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success']) {
+          return data['response'];
+        }
+      }
+      
+      // Fallback to predefined responses if API call fails
+      return _getMockResponse(userMessage);
+    } catch (e) {
+      // Fallback to predefined responses if API call fails
+      return _getMockResponse(userMessage);
+    }
+  }
+
+  // Helper method for mock responses
+  static String _getMockResponse(String userMessage) {
     if (userMessage.toLowerCase().contains('hello') || 
         userMessage.toLowerCase().contains('hi')) {
       return "Hello there! How can I assist you with the boardinghouse management?";
@@ -44,41 +76,45 @@ class AIResponseService {
     }
   }
 
-  // In a real implementation, this would connect to an actual AI API
-  static Future<String> getAdvancedAIResponse(String userMessage, String apiKey) async {
+  // Alternative method that uses the admin-specific API key if needed
+  static Future<String> getAdvancedAIResponse(String userMessage) async {
     try {
-      // This is a placeholder for actual API integration
-      // Replace with your preferred AI service (OpenAI, Google, etc.)
-      final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {
-              'role': 'system',
-              'content': 'You are a helpful assistant for a boardinghouse management system. Respond to user queries about property management, bookings, analytics, and other admin tasks. Keep responses concise and professional.'
-            },
-            {
-              'role': 'user',
-              'content': userMessage
-            }
-          ],
-        }),
-      );
+      // Get the admin-specific API key
+      String? adminApiKey = dotenv.env['ADMIN_AI_API_KEY'];
+      
+      if (adminApiKey != null && adminApiKey.isNotEmpty) {
+        // Use the admin API key with OpenAI-compatible endpoint
+        final response = await http.post(
+          Uri.parse('https://api.openai.com/v1/chat/completions'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $adminApiKey',
+          },
+          body: jsonEncode({
+            'model': 'gpt-3.5-turbo',
+            'messages': [
+              {
+                'role': 'system',
+                'content': 'You are a helpful assistant for a boardinghouse management system. Respond to user queries about property management, bookings, analytics, and other admin tasks. Keep responses concise and professional.'
+              },
+              {
+                'role': 'user',
+                'content': userMessage
+              }
+            ],
+          }),
+        );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['choices'][0]['message']['content'];
-      } else {
-        // Fallback to mock response if API fails
-        return await getAIResponse(userMessage);
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          return data['choices'][0]['message']['content'];
+        }
       }
+
+      // Fallback to backend API if admin key is not available or fails
+      return await getAIResponse(userMessage);
     } catch (e) {
-      // Fallback to mock response if API fails
+      // Fallback to backend API if admin key fails
       return await getAIResponse(userMessage);
     }
   }
